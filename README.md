@@ -2,21 +2,20 @@
 
 ## 跑通指令
 
-### 训练
+## 跑通指令
+Step1.先进入虚拟环境
+source /home/hbxz_lzl/venvs/lstr_bw/bin/activate
 
-CUDA_VISIBLE_DEVICES=0 python -u tools/train_net.py \
-  --config_file ./configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml \
-  --gpu 0 \
-  SOLVER.PHASES "['train']" \
-  DATA_LOADER.NUM_WORKERS 0 \
-  DATA_LOADER.PIN_MEMORY False
+cd long-short-term-transformer
+# Training from scratch
+python tools/train_net.py --config_file $PATH_TO_CONFIG_FILE --gpu $CUDA_VISIBLE_DEVICES
+# Finetuning from a pretrained model
+python tools/train_net.py --config_file /home/hbxz_lzl/LSTR_Improve/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml --gpu 1 \
+    MODEL.CHECKPOINT /home/hbxz_lzl/LSTR_Improve/checkpoints/home/hbxz_lzl/LSTR-Trimodal/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x/epoch-7.pth
 
-### 测试
 
-CUDA_VISIBLE_DEVICES=0 python -u tools/test_net.py \
-  --config_file ./configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml \
-  --gpu 0 \
-  MODEL.CHECKPOINT ./checkpoints/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x/epoch-25.pth \
-  MODEL.LSTR.INFERENCE_MODE batch \
-  DATA_LOADER.NUM_WORKERS 0 \
-  DATA_LOADER.PIN_MEMORY False
+# 推理
+cd long-short-term-transformer
+# Online inference in stream mode
+python tools/test_net.py --config_file /home/hbxz_lzl/LSTR_Improve/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml --gpu 1 \
+    MODEL.CHECKPOINT /home/hbxz_lzl/LSTR_Improve/checkpoints/home/hbxz_lzl/LSTR-Trimodal/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x/epoch-7.pth MODEL.LSTR.INFERENCE_MODE batch
