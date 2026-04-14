@@ -4,7 +4,7 @@
 
 ### 训练
 
-CUDA_VISIBLE_DEVICES=0 python -u tools/train_net.py \
+CUDA_VISIBLE_DEVICES=3 python -u tools/train_net.py \
   --config_file ./configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml \
   --gpu 0 \
   SOLVER.PHASES "['train']" \
