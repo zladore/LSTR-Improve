@@ -8,7 +8,7 @@ source /home/hbxz_lzl/venvs/lstr_bw/bin/activate
 
 cd long-short-term-transformer
 # Training from scratch
-python tools/train_net.py --config_file $PATH_TO_CONFIG_FILE --gpu $CUDA_VISIBLE_DEVICES
+python tools/train_net.py --config_file /home/hbxz_lzl/LSTR_Test/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml --gpu 4
 # Finetuning from a pretrained model
 python tools/train_net.py --config_file /home/hbxz_lzl/LSTR_Improve/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml --gpu 1 \
     MODEL.CHECKPOINT /home/hbxz_lzl/LSTR_Improve/checkpoints/home/hbxz_lzl/LSTR-Trimodal/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x/epoch-7.pth
