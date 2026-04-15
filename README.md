@@ -8,17 +8,17 @@ source /home/hbxz_lzl/venvs/lstr_bw/bin/activate
 
 cd long-short-term-transformer
 # Training from scratch
-python tools/train_net.py --config_file /home/hbxz_lzl/LSTR_Test/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml --gpu 4
+python tools/train_net.py --config_file /home/hbxz_lzl/LSTR_Test/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml --gpu 0
 # Finetuning from a pretrained model
-python tools/train_net.py --config_file /home/hbxz_lzl/LSTR_Improve/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml --gpu 1 \
-    MODEL.CHECKPOINT /home/hbxz_lzl/LSTR_Improve/checkpoints/home/hbxz_lzl/LSTR-Trimodal/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x/epoch-7.pth
+python tools/train_net.py --config_file /home/hqu/PycharmProjects/LSTR/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml --gpu 1 \
+    MODEL.CHECKPOINT /home/hbxz_lzl/LSTR_Test/checkpoints/home/hbxz_lzl/LSTR_Test/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x/epoch-12.pth
 
 
 # 推理
 cd long-short-term-transformer
 # Online inference in stream mode
-python tools/test_net.py --config_file /home/hbxz_lzl/LSTR_Improve/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml --gpu 1 \
-    MODEL.CHECKPOINT /home/hbxz_lzl/LSTR_Improve/checkpoints/home/hbxz_lzl/LSTR-Trimodal/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x/epoch-7.pth MODEL.LSTR.INFERENCE_MODE batch
+python tools/test_net.py --config_file /home/hqu/PycharmProjects/LSTR/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml --gpu 1 \
+    MODEL.CHECKPOINT /home/hqu/PycharmProjects/LSTR/checkpoints/home/hqu/PycharmProjects/LSTR/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x/epoch-15.pth MODEL.LSTR.INFERENCE_MODE batch
 
 ## 类名
 
