@@ -22,3 +22,11 @@ alpha=0.01 → 0.70633
 **alpha=0.02 → 0.70951**
 alpha=0.03 → 0.70923
 alpha=0.05 → 0.70861
+
+
+# v1-prototype_text + CLIP-L_evidence_only + alpha=0.02
+baseline：0.70823
+之前最好：v2-core_par_hard + evi_opt + alpha=0.02 → 0.70951
+现在：v1-prototype_text + evidence_only + alpha=0.02 → 0.71129
+
+'checkpoints/home/hbxz_lzl/LSTR_Improve/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x', 'SESSION': '', 'VERBOSE': False, 'GPU': '2'}) BatchInference: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████| 696/696 [07:45<00:00, 1.50it/s] Action detection perframe mAP: 0.71129
