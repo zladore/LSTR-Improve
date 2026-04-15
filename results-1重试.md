@@ -1,3 +1,5 @@
+# 提升 0.647
+
 Epoch  1 | train det_loss: 0.97338 | test det_loss: 0.70363 det_mAP: 0.54422 | running time: 40.61 sec
 Epoch  2 | train det_loss: 0.50023 | test det_loss: 0.65457 det_mAP: 0.62983 | running time: 29.43 sec
 Epoch  3 | train det_loss: 0.40792 | test det_loss: 0.54044 det_mAP: 0.65597 | running time: 27.73 sec
