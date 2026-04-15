@@ -61,3 +61,7 @@ Epoch 23 | train det_loss: 0.15110 | test det_loss: 0.52596 det_mAP: 0.71017 | r
 Epoch 24 | train det_loss: 0.14932 | test det_loss: 0.53053 det_mAP: 0.71098 | running time: 36.54 sec
 Epoch 25 | train det_loss: 0.14908 | test det_loss: 0.52863 det_mAP: 0.71088 | running time: 34.92 sec
 
+BatchInference: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████| 696/696 [10:05<00:00,  1.15it/s]
+Action detection perframe mAP: 0.71470
+MODEL.LSTR.INFERENCE_MODE: command not found
+(lstr_bw) hbxz_lzl@hqu:~/LSTR-Trimodal$ 
