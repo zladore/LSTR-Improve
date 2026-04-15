@@ -21,6 +21,7 @@ python tools/test_net.py --config_file /home/hbxz_lzl/LSTR_Improve/configs/THUMO
     MODEL.CHECKPOINT /home/hbxz_lzl/LSTR_Improve/checkpoints/home/hbxz_lzl/LSTR-Trimodal/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x/epoch-7.pth MODEL.LSTR.INFERENCE_MODE batch
 
 ## 类名
+
 CLASS_NAMES = [
     'Background', 'BaseballPitch', 'BasketballDunk', 'Billiards', 'CleanAndJerk',
     'CliffDiving', 'CricketBowling', 'CricketShot', 'Diving', 'FrisbeeCatch',
@@ -28,10 +29,4 @@ CLASS_NAMES = [
     'PoleVault', 'Shotput', 'SoccerPenalty', 'TennisSwing', 'ThrowDiscus',
     'VolleyballSpiking', 'Ambiguous'
 ]
-# CLASS_NAMES = [
-#     '背景', '棒球投球', '篮球扣篮', '台球', '举重挺举',
-#     '悬崖跳水', '板球投球', '板球击球', '跳水', '飞盘接捕',
-#     '高尔夫挥杆', '链球投掷', '跳高', '标枪投掷', '跳远',
-#     '撑杆跳', '铅球投掷', '足球点球', '网球挥拍', '铁饼投掷',
-#     '排球扣球', '模糊类'
-# ]
+
