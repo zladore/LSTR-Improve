@@ -1,192 +1,166 @@
-# Long Short-Term Transformer for Online Action Detection
+对，你这个纠正非常重要，我前面把三模态锚点记错了。
 
-## 跑通指令
+## 现在正式以你这条记录为准
 
-### 训练
+### 双模态 baseline
 
-CUDA_VISIBLE_DEVICES=0 python -u tools/train_net.py \
-  --config_file ./configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml \
-  --gpu 0 \
-  SOLVER.PHASES "['train']" \
-  DATA_LOADER.NUM_WORKERS 0 \
-  DATA_LOADER.PIN_MEMORY False
+* repo：`/home/hbxz_lzl/LSTR_Improve`
+* best mAP：**0.70823**
+* checkpoint：
 
-### 测试
-
-CUDA_VISIBLE_DEVICES=0 python -u tools/test_net.py \
-  --config_file ./configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml \
-  --gpu 0 \
-  MODEL.CHECKPOINT ./checkpoints/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x/epoch-25.pth \
-  MODEL.LSTR.INFERENCE_MODE batch \
-  DATA_LOADER.NUM_WORKERS 0 \
-  DATA_LOADER.PIN_MEMORY False
-
-## 可跑通配置
-
-    你现在能跑通的关键设置是：
-
-    Python 3.11 venv
-    torch 2.9.1+cu128
-    SOLVER.PHASES ['train']
-    DATA_LOADER.NUM_WORKERS 0
-    DATA_LOADER.PIN_MEMORY False
-
-## Introduction
-
-This is a PyTorch implementation for our NeurIPS 2021 Spotlight paper "[`Long Short-Term Transformer for Online Action Detection`](https://arxiv.org/pdf/2107.03377.pdf)".
-
-![network](demo/network.png?raw=true)
-
-## Environment
-
-- The code is developed with CUDA 10.2, ***Python >= 3.7.7***, ***PyTorch >= 1.7.1***
-
-    0. [Optional but recommended] create a new conda environment.
-        ```
-        conda create -n lstr python=3.7.7
-        ```
-        And activate the environment.
-        ```
-        conda activate lstr
-        ```
-
-    1. Install the requirements
-        ```
-        pip install -r requirements.txt
-        ```
-
-## Data Preparation
-
-#### Option1: Prepare the features and targets by yourself.
-
-1. Download the [`THUMOS'14`](https://www.crcv.ucf.edu/THUMOS14/) and [`TVSeries`](https://homes.esat.kuleuven.be/psi-archive/rdegeest/TVSeries.html) datasets.
-
-2. Extract feature representations for video frames.
-
-    * For **ActivityNet** pretrained features, we use the [`ResNet-50`](https://arxiv.org/pdf/1512.03385.pdf) model for the RGB and optical flow inputs. We recommend to use this [`checkpoint`](https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/tsn/README.md#activitynet-v13) in [`MMAction2`](https://github.com/open-mmlab/mmaction2).
-
-    * For **Kinetics** pretrained features, we use the [`ResNet-50`](https://arxiv.org/pdf/1512.03385.pdf) model for the RGB inputs. We recommend to use this [`checkpoint`](https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/tsn/tsn_r50_320p_1x1x8_100e_kinetics400_rgb.py) in [`MMAction2`](https://github.com/open-mmlab/mmaction2). We use the [`BN-Inception`](https://arxiv.org/pdf/1502.03167.pdf) model for the optical flow inputs. We recommend to use the model [`here`](https://drive.google.com/drive/folders/1Q8yf2u8YWkva-apAxW_9_TzvLGuWZaix?usp=sharing).
-    
-    ***Note:*** We compute the optical flow using [`DenseFlow`](https://github.com/xumingze0308/denseflow).
-
-3. If you want to use our [dataloaders](src/rekognition_online_action_detection/datasets), please make sure to put the files as the following structure:
-
-    * THUMOS'14 dataset:
-        ```
-        $YOUR_PATH_TO_THUMOS_DATASET
-        ├── rgb_kinetics_resnet50/
-        |   ├── video_validation_0000051.npy (of size L x 2048)
-        │   ├── ...
-        ├── flow_kinetics_bninception/
-        |   ├── video_validation_0000051.npy (of size L x 1024)
-        |   ├── ...
-        ├── target_perframe/
-        |   ├── video_validation_0000051.npy (of size L x 22)
-        |   ├── ...
-        ```
-    
-    * TVSeries dataset:
-        ```
-        $YOUR_PATH_TO_TVSERIES_DATASET
-        ├── rgb_kinetics_resnet50/
-        |   ├── Breaking_Bad_ep1.npy (of size L x 2048)
-        │   ├── ...
-        ├── flow_kinetics_bninception/
-        |   ├── Breaking_Bad_ep1.npy (of size L x 1024)
-        |   ├── ...
-        ├── target_perframe/
-        |   ├── Breaking_Bad_ep1.npy (of size L x 31)
-        |   ├── ...
-        ```
-
-4. Create softlinks of datasets:
-    ```
-    cd long-short-term-transformer
-    ln -s $YOUR_PATH_TO_THUMOS_DATASET data/THUMOS
-    ln -s $YOUR_PATH_TO_TVSERIES_DATASET data/TVSeries
-    ```
-    
-#### Option2: Directly download the pre-extracted features and targets from [`TeSTra`](https://github.com/zhaoyue-zephyrus/TeSTra).
-
-If you want to skip the data preprocessing and quickly try LSTR, please refer to [`TeSTra`](https://github.com/zhaoyue-zephyrus/TeSTra). The features and targets there ***exactly*** follow LSTR's data structure and should be able to reproduce LSTR's performance. However, if you have any question about the processing of these features and targets, please contact the authors of [`TeSTra`](https://github.com/zhaoyue-zephyrus/TeSTra) directly.
-
-## Training
-
-Training LSTR with 512 seconds long-term memory and 8 seconds short-term memory requires less 3 GB GPU memory.
-
-The commands are as follows.
-
-```
-cd long-short-term-transformer
-# Training from scratch
-python tools/train_net.py --config_file $PATH_TO_CONFIG_FILE --gpu $CUDA_VISIBLE_DEVICES
-# Finetuning from a pretrained model
-python tools/train_net.py --config_file $PATH_TO_CONFIG_FILE --gpu $CUDA_VISIBLE_DEVICES \
-    MODEL.CHECKPOINT $PATH_TO_CHECKPOINT
+```text
+/home/hbxz_lzl/LSTR_Improve/checkpoints/home/hbxz_lzl/LSTR-Trimodal/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x/epoch-12.pth
 ```
 
-## Online Inference
+### 三模态 baseline
 
-There are *three kinds* of evaluation methods in our code.
+* repo：`/home/hbxz_lzl/LSTR_Test`
+* 配置：**trimodal + clipL + evidence_only**
+* best mAP：**0.71518**
+* config：
 
-* First, you can use the config `SOLVER.PHASES "['train', 'test']"` during training. This process devides each test video into non-overlapping samples, and makes prediction on the all the frames in the short-term memory as if they were the latest frame. Note that this evaluation result is ***not*** the final performance, since (1) for most of the frames, their short-term memory is not fully utlized and (2) for simplicity, samples in the boundaries are mostly ignored.
-
-    ```
-    cd long-short-term-transformer
-    # Inference along with training
-    python tools/train_net.py --config_file $PATH_TO_CONFIG_FILE --gpu $CUDA_VISIBLE_DEVICES \
-        SOLVER.PHASES "['train', 'test']"
-    ```
-
-* Second, you could run the online inference in `batch mode`. This process evaluates all video frames by considering each of them as the latest frame and filling the long- and short-term memories by tracing back in time. Note that this evaluation result matches the numbers reported in the paper, but `batch mode` cannot be further accelerated as descibed in paper's Sec 3.6. On the other hand, this mode can run faster when you use a large batch size, and we recomand to use it for performance benchmarking.
-
-    ```
-    cd long-short-term-transformer
-    # Online inference in batch mode
-    python tools/test_net.py --config_file $PATH_TO_CONFIG_FILE --gpu $CUDA_VISIBLE_DEVICES \
-        MODEL.CHECKPOINT $PATH_TO_CHECKPOINT MODEL.LSTR.INFERENCE_MODE batch
-    ```
-
-* Third, you could run the online inference in `stream mode`. This process tests frame by frame along the entire video, from the beginning to the end. Note that this evaluation result matches the both LSTR's performance and runtime reported in the paper. It processes the entire video as LSTR is applied to real-world scenarios. However, currently it only supports to test one video at each time.
-
-    ```
-    cd long-short-term-transformer
-    # Online inference in stream mode
-    python tools/test_net.py --config_file $PATH_TO_CONFIG_FILE --gpu $CUDA_VISIBLE_DEVICES \
-        MODEL.CHECKPOINT $PATH_TO_CHECKPOINT MODEL.LSTR.INFERENCE_MODE stream DATA.TEST_SESSION_SET "['$VIDEO_NAME']"
-    ```
-
-## Evaluation
-
-Evaluate LSTR's performance for online action detection using perframe mAP or mcAP.
-
-```
-cd long-short-term-transformer
-python tools/eval/eval_perframe --pred_scores_file $PRED_SCORES_FILE
+```text
+configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x_trimodal_clipL_evidence_only.yaml
 ```
 
-Evaluate LSTR's performance at different action stages by evaluating each decile (ten-percent interval) of the video frames separately.
+* checkpoint：
 
+```text
+/home/hbxz_lzl/LSTR_Test/checkpoints/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x_trimodal_clipL_evidence_only/clipL_evidence_only_v1/epoch-14.pth
 ```
-cd long-short-term-transformer
-python tools/eval/eval_perstage --pred_scores_file $PRED_SCORES_FILE
+
+也就是说，**三模态主锚点不是我前面说的 `v2 gated 0.71136`，而是你这条 `evidence_only 0.71518`**。
+
+这个差别很关键，因为后面所有实验都应该拿 **0.71518** 当三模态起点，不然结论会偏。
+
+---
+
+## 后面实验的主战场也顺手定了
+
+* 双模态实验：在 `/home/hbxz_lzl/LSTR_Improve`
+* 三模态实验：在 `/home/hbxz_lzl/LSTR_Test`
+
+不再用 `LSTR_Test-v2` 当主三模态战场了，至少 **A 组**先不要用它。
+
+---
+
+## 那 A 组四个实验，三模态两条要改成这个版本
+
+### A1 双模态 full additive logits
+
+```bash
+cd /home/hbxz_lzl/LSTR_Improve
+source /home/hbxz_lzl/venvs/lstr_bw/bin/activate
+
+python tools/test_net.py \
+  --config_file /home/hbxz_lzl/LSTR_Improve/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml \
+  --gpu 4 \
+  MODEL.CHECKPOINT /home/hbxz_lzl/LSTR_Improve/checkpoints/home/hbxz_lzl/LSTR-Trimodal/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x/epoch-12.pth \
+  MODEL.TEXT_CALIBRATION.ENABLED True \
+  MODEL.TEXT_CALIBRATION.MODE additive_logits \
+  MODEL.TEXT_CALIBRATION.ALPHA 0.02 \
+  MODEL.TEXT_CALIBRATION.TEXT_TEMP 0.07 \
+  MODEL.TEXT_CALIBRATION.LOGIT_TOPK_ONLY False \
+  MODEL.TEXT_CALIBRATION.CLASS_FEATURE_PATH /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/clss_text_features/v1-prototype_text/class_text_features.npy \
+  MODEL.TEXT_CALIBRATION.CLASS_ORDER_PATH /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/clss_text_features/v1-prototype_text/class_feature_order.json \
+  MODEL.TEXT_CALIBRATION.CLASS_TEXT_JSON_PATH /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/clss_text_features/v1-prototype_text/class_texts.json \
+  MODEL.TEXT_CALIBRATION.FRAME_FEATURE_ROOT /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/text_features/CLIP-L_evidence_only
 ```
 
-## Citations
+### A2 双模态 top-3 additive logits
 
-If you are using the data/code/model provided here in a publication, please cite our paper:
+```bash
+cd /home/hbxz_lzl/LSTR_Improve
+source /home/hbxz_lzl/venvs/lstr_bw/bin/activate
 
-	@inproceedings{xu2021long,
-  		title={Long Short-Term Transformer for Online Action Detection},
-  		author={Xu, Mingze and Xiong, Yuanjun and Chen, Hao and Li, Xinyu and Xia, Wei and Tu, Zhuowen and Soatto, Stefano},
-  		booktitle={Conference on Neural Information Processing Systems (NeurIPS)},
-  		year={2021}
-	}
+python tools/test_net.py \
+  --config_file /home/hbxz_lzl/LSTR_Improve/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x.yaml \
+  --gpu 4 \
+  MODEL.CHECKPOINT /home/hbxz_lzl/LSTR_Improve/checkpoints/home/hbxz_lzl/LSTR-Trimodal/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x/epoch-12.pth \
+  MODEL.TEXT_CALIBRATION.ENABLED True \
+  MODEL.TEXT_CALIBRATION.MODE additive_logits \
+  MODEL.TEXT_CALIBRATION.ALPHA 0.02 \
+  MODEL.TEXT_CALIBRATION.TEXT_TEMP 0.07 \
+  MODEL.TEXT_CALIBRATION.LOGIT_TOPK_ONLY True \
+  MODEL.TEXT_CALIBRATION.LOGIT_TOPK 3 \
+  MODEL.TEXT_CALIBRATION.CLASS_FEATURE_PATH /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/clss_text_features/v1-prototype_text/class_text_features.npy \
+  MODEL.TEXT_CALIBRATION.CLASS_ORDER_PATH /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/clss_text_features/v1-prototype_text/class_feature_order.json \
+  MODEL.TEXT_CALIBRATION.CLASS_TEXT_JSON_PATH /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/clss_text_features/v1-prototype_text/class_texts.json \
+  MODEL.TEXT_CALIBRATION.FRAME_FEATURE_ROOT /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/text_features/CLIP-L_evidence_only
+```
 
-## Security
+### A3 三模态 full additive logits
 
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+```bash
+cd /home/hbxz_lzl/LSTR_Test
+source /home/hbxz_lzl/venvs/lstr_bw/bin/activate
 
-## License
+python tools/test_net.py \
+  --config_file /home/hbxz_lzl/LSTR_Test/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x_trimodal_clipL_evidence_only.yaml \
+  --gpu 4 \
+  MODEL.CHECKPOINT /home/hbxz_lzl/LSTR_Test/checkpoints/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x_trimodal_clipL_evidence_only/clipL_evidence_only_v1/epoch-14.pth \
+  MODEL.TEXT_CALIBRATION.ENABLED True \
+  MODEL.TEXT_CALIBRATION.MODE additive_logits \
+  MODEL.TEXT_CALIBRATION.ALPHA 0.02 \
+  MODEL.TEXT_CALIBRATION.TEXT_TEMP 0.07 \
+  MODEL.TEXT_CALIBRATION.LOGIT_TOPK_ONLY False \
+  MODEL.TEXT_CALIBRATION.CLASS_FEATURE_PATH /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/clss_text_features/v1-prototype_text/class_text_features.npy \
+  MODEL.TEXT_CALIBRATION.CLASS_ORDER_PATH /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/clss_text_features/v1-prototype_text/class_feature_order.json \
+  MODEL.TEXT_CALIBRATION.CLASS_TEXT_JSON_PATH /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/clss_text_features/v1-prototype_text/class_texts.json \
+  MODEL.TEXT_CALIBRATION.FRAME_FEATURE_ROOT /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/text_features/CLIP-L_evidence_only
+```
 
-This project is licensed under the Apache-2.0 License.
+### A4 三模态 top-3 additive logits
+
+```bash
+cd /home/hbxz_lzl/LSTR_Test
+source /home/hbxz_lzl/venvs/lstr_bw/bin/activate
+
+python tools/test_net.py \
+  --config_file /home/hbxz_lzl/LSTR_Test/configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x_trimodal_clipL_evidence_only.yaml \
+  --gpu 4 \
+  MODEL.CHECKPOINT /home/hbxz_lzl/LSTR_Test/checkpoints/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x_trimodal_clipL_evidence_only/clipL_evidence_only_v1/epoch-14.pth \
+  MODEL.TEXT_CALIBRATION.ENABLED True \
+  MODEL.TEXT_CALIBRATION.MODE additive_logits \
+  MODEL.TEXT_CALIBRATION.ALPHA 0.02 \
+  MODEL.TEXT_CALIBRATION.TEXT_TEMP 0.07 \
+  MODEL.TEXT_CALIBRATION.LOGIT_TOPK_ONLY True \
+  MODEL.TEXT_CALIBRATION.LOGIT_TOPK 3 \
+  MODEL.TEXT_CALIBRATION.CLASS_FEATURE_PATH /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/clss_text_features/v1-prototype_text/class_text_features.npy \
+  MODEL.TEXT_CALIBRATION.CLASS_ORDER_PATH /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/clss_text_features/v1-prototype_text/class_feature_order.json \
+  MODEL.TEXT_CALIBRATION.CLASS_TEXT_JSON_PATH /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/clss_text_features/v1-prototype_text/class_texts.json \
+  MODEL.TEXT_CALIBRATION.FRAME_FEATURE_ROOT /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/text_features/CLIP-L_evidence_only
+```
+
+---
+
+## 结果表也一起改正
+
+* 双模态 baseline：**0.70823**
+
+* 双模态 A1：`?`
+
+* 双模态 A2：`?`
+
+* 三模态 baseline：**0.71518**
+
+* 三模态 A3：`?`
+
+* 三模态 A4：`?`
+
+---
+
+## 现在的结论也顺手更新一下
+
+这反而更支持你前面那个判断：
+
+> **三模态 backbone 更强，更值得作为后续推理反馈优化的主战场。**
+
+因为它不是 0.71136，而是 **0.71518**，比双模态高得更明显。
+
+所以现在不再纠结了：
+
+* 三模态：主战场
+* 双模态：锚点对照
+
+你先按这个正确版本跑 A 组。
