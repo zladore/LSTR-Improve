@@ -1,6 +1,0 @@
-numpy<2
-opencv-python
-scikit-image
-scikit-learn
-tqdm==4.44.1
-yacs==0.1.8
