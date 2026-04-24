@@ -1,4 +1,6 @@
 # LSTR_Test stable mainline backup
+## 恢复该版本指令
+/home/hbxz_lzl/LSTR_Test_backups/github_mainline_71911_20260424_051715/restore_mainline.sh
 
 ## Purpose
 This backup preserves the currently verified stable classifier-only TTA mainline.
