@@ -2,6 +2,29 @@
 ## 恢复该版本指令
 /home/hbxz_lzl/LSTR_Test_backups/github_mainline_71911_20260424_051715/restore_mainline.sh
 
+## 目前最好结果  复现三模态 71.950 的命令
+cd /home/hbxz_lzl/LSTR_Test
+mkdir -p /home/hbxz_lzl/LSTR_Test/logs_tta
+
+CUDA_VISIBLE_DEVICES=0 python tools/test_net.py \
+  --config_file configs/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x_trimodal_clipL_evidence_only.yaml \
+  --gpu 0 \
+  MODEL.CHECKPOINT /home/hbxz_lzl/LSTR_Test/checkpoints/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x_trimodal_clipL_evidence_only/clipL_evidence_only_v1/epoch-14.pth \
+  INPUT.MODALITY threestream \
+  MODEL.TEXT_CALIBRATION.ENABLED True \
+  MODEL.TEXT_CALIBRATION.CLASS_FEATURE_PATH /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/clss_text_features/v1-prototype_text/class_text_features.npy \
+  MODEL.TEXT_CALIBRATION.CLASS_ORDER_PATH /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/clss_text_features/v1-prototype_text/class_feature_order.json \
+  MODEL.TEXT_CALIBRATION.CLASS_TEXT_JSON_PATH /home/hbxz_lzl/LSTR_Improve/data/Output_THUMOS/clss_text_features/v1-prototype_text/class_texts.json \
+  MODEL.TEXT_CALIBRATION.FRAME_FEATURE_ROOT /home/hbxz_lzl/LSTR_Test/data/Output_THUMOS/text_features/CLIP-L_evidence_only \
+  MODEL.TEXT_CALIBRATION.MODE tta_kl_topk \
+  MODEL.TEXT_CALIBRATION.TTA_STEPS 2 \
+  MODEL.TEXT_CALIBRATION.TTA_LR 4e-4 \
+  MODEL.TEXT_CALIBRATION.TTA_TOPK 3 \
+  2>&1 | tee /home/hbxz_lzl/LSTR_Test/logs_tta/tri_epoch14_v1_step2_lr4e-4_topk3.log
+
+cp /home/hbxz_lzl/LSTR_Test/checkpoints/THUMOS/LSTR/lstr_long_512_work_8_kinetics_1x_trimodal_clipL_evidence_only/clipL_evidence_only_v1/epoch-14.pkl \
+   /home/hbxz_lzl/LSTR_Test/logs_tta/tri_epoch14_v1_step2_lr4e-4_topk3.pkl
+
 ## Purpose
 This backup preserves the currently verified stable classifier-only TTA mainline.
 
